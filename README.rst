@@ -19,10 +19,10 @@ Since this requires forking the jvm and we don't want to wait for the applicatio
   start the mainClass of your project using spring-loaded, all arguments are passed though to it.
 
 :code:`reStop`
-  stop a previous invocation of mainClass
+  stop a previous invocation of :code:`reStart`
 
 :code:`reList`
-  list what projects that have reStart JVMs running
+  list what projects that have :code:`reStart` JVMs running
   
 Typical use case::
 
