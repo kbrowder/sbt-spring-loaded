@@ -44,7 +44,7 @@ Copyright and License
 
 Released under GPLv3_.
 
-Copyright |copy| 2014 Kevin Browder.
+Copyright (C) 2014 Kevin Browder.
 
 .. include:: <isonum.txt>
 .. _SBT: http://www.scala-sbt.org/
