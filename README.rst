@@ -1,5 +1,9 @@
-This plugin allows your to start processes using the vastly under-appreciated spring-loaded_ Java agent, 
+This plugin allows your to start processes using the spring-loaded_ Java class reloading agent, 
 a FOSS alternative to JRebel (albiet a somewhat limited alternative).
+
+This has been minimally tested against spray and akka classes YMMV. 
+
+This is the authors first "from-scratch" sbt plugin, so please be gentle.
 
 Installation
 ============
@@ -46,7 +50,6 @@ Released under GPLv3_.
 
 Copyright (C) 2014 Kevin Browder.
 
-.. include:: <isonum.txt>
 .. _SBT: http://www.scala-sbt.org/
 .. _GPLv3: http://www.gnu.org/licenses/gpl-3.0.txt
 .. _spring-loaded: https://github.com/spring-projects/spring-loaded
