@@ -1,0 +1,9 @@
+# list plugins
+> plugins
+# try reStart
+> reStart
+$ sleep 1000
+#try reStop
+> reStart 5000
+> reList
+> reStop
