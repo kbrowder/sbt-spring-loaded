@@ -9,7 +9,7 @@ Installation
 ============
 sbt-spring-loaded requires SBT_ >= 0.13.5 (for AutoPlugin).  Add the following to your project/plugins.sbt::
 
-  addSbtPlugin("me.browder" % "sbt-spring-loaded" % "0.1.0")
+  addSbtPlugin("me.browder" % "sbt-spring-loaded" % "0.2.0")
 
 Usage
 =====
@@ -28,6 +28,18 @@ Typical use case::
 
   reStart
   ~compile
+  
+By default version 0.2.0 and greater now uses the Concurrent Mark Sweep GC so that class unloading can be used.
+Otherwise classes are kept forever which can lead to OOM: PermGen when doing class reloading, esp. on JDK < 8 which pulls from a fixed PermGen pool.
+JDK 8 introduces a new Mataspace which can use all of your memory (reducing the occurence of the issue)
+You can override this behavior by doing the following in sbt::
+
+  set noClassUnloading := true
+
+Or you can add the following after the plugin load in plugins.sbt::
+
+  noClassUnloading := true
+  
 
 When you change your source you'll get new compiles which spring-loaded will pick up.
  

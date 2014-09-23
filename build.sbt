@@ -4,7 +4,7 @@ sbtPlugin := true
 
 name := "sbt-spring-loaded"
 
-version := "0.2.0-SNAPSHOT"
+version := "0.2.0"
 
 organization := "me.browder"
 
