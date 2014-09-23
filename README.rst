@@ -28,7 +28,9 @@ Typical use case::
 
   reStart
   ~compile
-  
+
+When you change your source you'll get new compiles which spring-loaded will pick up.
+
 By default version 0.2.0 and greater now uses the Concurrent Mark Sweep GC so that class unloading can be used.
 Otherwise classes are kept forever which can lead to OOM: PermGen when doing class reloading, esp. on JDK < 8 which pulls from a fixed PermGen pool.
 JDK 8 introduces a new Mataspace which can use all of your memory (reducing the occurence of the issue)
@@ -41,7 +43,7 @@ Or you can add the following after the plugin load in plugins.sbt::
   noClassUnloading := true
   
 
-When you change your source you'll get new compiles which spring-loaded will pick up.
+
  
 Special Thanks
 ==============
