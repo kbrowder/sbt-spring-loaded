@@ -5,12 +5,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -34,6 +34,11 @@ object SbtSpringLoaded extends AutoPlugin {
     lazy val reList = inputKey[Unit]("Show projects with running JVMs created with reStart")
 
     lazy val forkedProcs = settingKey[mutable.Map[ProjectRef, ForkedProc]]("Mapping of projects to there forked process")
+    lazy val noClassUnloading = settingKey[Boolean](
+      """|Disable CMS Class Unloading and also enable the Concurrent Mark Sweep garbage collector, 
+         | setting this to true makes it so loaded (or changed) classes stay in PermGen FOREVER.
+         |  This is less of an issue in Java > 8 since PermGen space has moved to Metaspace which 
+         | can consume up to your systems max memory""".stripMargin)
   }
   import autoImport._
 
@@ -44,13 +49,19 @@ object SbtSpringLoaded extends AutoPlugin {
     mainClass in reStart <<= mainClass in run in Compile,
     fullClasspath in reStart <<= fullClasspath in Runtime,
     forkedProcs in reStart := mutable.HashMap.empty[ProjectRef, ForkedProc],
-    reStart <<= reStartTask(fullClasspath in reStart, mainClass in reStart, forkedProcs in reStart),
+    noClassUnloading := false,
+    
+    reStart <<= reStartTask(fullClasspath in reStart,
+                            mainClass in reStart,
+                            forkedProcs in reStart, 
+                            noClassUnloading),
     reStop <<= reStopTask(forkedProcs in reStart),
     reList <<= reListTask(forkedProcs in reStart))
 
   def reStartTask(classpath: Initialize[Task[Classpath]],
                   mainClassTask: Initialize[Task[Option[String]]],
-                  forkedProcs: SettingKey[mutable.Map[ProjectRef, ForkedProc]]): Initialize[InputTask[ForkedProc]] = {
+                  forkedProcs: SettingKey[mutable.Map[ProjectRef, ForkedProc]],
+                  noClassUnloading: SettingKey[Boolean]): Initialize[InputTask[ForkedProc]] = {
     import Def.parserToInput
     val parser = Def.spaceDelimited()
 
@@ -67,8 +78,12 @@ object SbtSpringLoaded extends AutoPlugin {
       lazy val springLoadedPath = springLoadedFile.getAbsolutePath()
 
       val log = streams.value.log
+      var runJVMOptions:Seq[String] = javaOptions.value ++ Seq(s"-javaagent:$springLoadedPath", "-noverify")
+      if (!noClassUnloading.value) {
+        runJVMOptions ++= Seq("-XX:+UseConcMarkSweepGC", "-XX:+CMSClassUnloadingEnabled")
+      }
       val forkOptions = ForkOptions(
-        runJVMOptions = javaOptions.value ++ Seq(s"-javaagent:$springLoadedPath", "-noverify"),
+        runJVMOptions = runJVMOptions, 
         connectInput = false)
 
       val options: Seq[String] = parser.parsed
@@ -77,6 +92,7 @@ object SbtSpringLoaded extends AutoPlugin {
       val scalaOptions = (classpathPart :+ mainClass) ++ options.toList
 
       log.warn(s"running $mainClass " + options.mkString)
+      log.debug(s"With jvmOptions=$runJVMOptions")
       val process = Fork.java.fork(forkOptions, scalaOptions)
 
       val projectRef = thisProjectRef.value
@@ -98,7 +114,7 @@ object SbtSpringLoaded extends AutoPlugin {
       oldProc.destroy()
     }
   }
-  
+
   def reListTask(forkedProcs: SettingKey[mutable.Map[ProjectRef, ForkedProc]]) = Def.inputTask {
     println("\nThe following projects have reStart jobs running:")
     for ((projectRef, forkedProc) <- forkedProcs.value if forkedProc.running) {
