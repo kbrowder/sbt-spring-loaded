@@ -8,7 +8,7 @@ version := "0.3.0-SNAPSHOT"
 
 organization := "me.browder"
 
-libraryDependencies += "org.springframework" % "springloaded" % "1.2.0.RELEASE"
+libraryDependencies += "org.springframework" % "springloaded" % "1.2.4.RELEASE"
 
 crossScalaVersions := Seq("2.10.0", "2.10.1", "2.10.2", "2.10.3", "2.10.4").reverse
 
